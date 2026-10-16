@@ -624,7 +624,7 @@ export class AdminCrmPage implements OnDestroy {
             const category = this.categories()[index]?.category;
             if (category) this.setFilter(category);
           },
-          (value) => `${value} solicitudes`,
+          (value) => String(value),
           'vertical',
         );
       }

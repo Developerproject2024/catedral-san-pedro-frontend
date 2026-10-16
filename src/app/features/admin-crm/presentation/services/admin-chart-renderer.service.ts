@@ -35,7 +35,10 @@ export interface AdminChartHandle {
   destroy(): void;
 }
 
-const createValueLabelPlugin = (orientation: 'vertical' | 'horizontal'): Plugin<'bar'> => ({
+const createValueLabelPlugin = (
+  orientation: 'vertical' | 'horizontal',
+  valueLabel: (value: number) => string,
+): Plugin<'bar'> => ({
   id: `admin-bar-values-${orientation}`,
   afterDatasetsDraw(chart) {
     const { ctx } = chart;
@@ -47,13 +50,12 @@ const createValueLabelPlugin = (orientation: 'vertical' | 'horizontal'): Plugin<
     ctx.font = '600 11px Inter, sans-serif';
     ctx.textBaseline = 'middle';
     elements.forEach((element, index) => {
-      const center = element.getCenterPoint();
       const { x, y } = element.getProps(['x', 'y'], true);
       ctx.textAlign = orientation === 'vertical' ? 'center' : 'left';
       ctx.fillText(
-        String(values[index]),
-        orientation === 'vertical' ? center.x : x + 8,
-        orientation === 'vertical' ? y - 10 : center.y,
+        valueLabel(Number(values[index])),
+        orientation === 'vertical' ? x : x + 8,
+        orientation === 'vertical' ? y - 10 : y,
       );
     });
     ctx.restore();
@@ -118,7 +120,14 @@ export class AdminChartRenderer {
           legend: { display: false },
           tooltip: {
             displayColors: false,
-            callbacks: { label: (context) => valueLabel(context.parsed.x ?? 0) },
+            callbacks: {
+              label: (context) =>
+                valueLabel(
+                  orientation === 'vertical'
+                    ? (context.parsed.y ?? 0)
+                    : (context.parsed.x ?? 0),
+                ),
+            },
           },
         },
         scales:
@@ -138,6 +147,7 @@ export class AdminChartRenderer {
                   beginAtZero: true,
                   border: { display: false },
                   grid: { color: '#f0eee7' },
+                  grace: '25%',
                   ticks: { precision: 0, color: '#817c72', font: { size: 9 } },
                 },
               }
@@ -146,6 +156,7 @@ export class AdminChartRenderer {
                   beginAtZero: true,
                   border: { display: false },
                   grid: { color: '#f0eee7' },
+                  grace: '20%',
                   ticks: { precision: 0, color: '#817c72', font: { size: 9 } },
                 },
                 y: {
@@ -155,7 +166,7 @@ export class AdminChartRenderer {
                 },
               },
       },
-      plugins: [createValueLabelPlugin(orientation)],
+      plugins: [createValueLabelPlugin(orientation, valueLabel)],
     };
     const chart = new Chart(canvas, configuration);
 
