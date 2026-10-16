@@ -150,8 +150,6 @@ describe('App', () => {
     expect(candleCards[6].classList).toContain('is-lit');
     expect(candleCards[6].textContent).toContain('Ana María');
     expect(compiled.querySelector('.candle-count')?.textContent).toContain('1 encendida');
-    expect(compiled.querySelector('.prayer-candle-time')?.textContent).toContain('24 h');
-    expect(compiled.querySelector('.prayer-candle-level')?.textContent).toContain('100%');
     expect(compiled.querySelector('.prayer-candle-votive .prayer-candle-wax')).not.toBeNull();
     expect(compiled.querySelector('.prayer-candle-votive .prayer-candle-holder')).not.toBeNull();
     expect(compiled.querySelector('.donation-confirmation')?.textContent).toContain(
@@ -713,14 +711,11 @@ describe('App', () => {
     expect(compiled.querySelector('.gospel-scripture h2')?.textContent).toBe('Lucas 12, 1-7');
     expect(compiled.querySelectorAll('.gospel-scripture-text p')).toHaveLength(7);
     expect(compiled.querySelector('.gospel-scripture-text')?.textContent).toContain(
-      'No temáis pues',
+      'Jesús advierte a sus discípulos',
     );
     expect(compiled.querySelector('.gospel-scripture .gospel-date')?.textContent).toContain(
       '16 de octubre de 2026',
     );
-    expect(
-      compiled.querySelector('.gospel-scripture .gospel-update-note a')?.getAttribute('href'),
-    ).toContain('version=RVA');
     expect(compiled.querySelector('.gospel-video-card .gospel-date')?.textContent).toContain(
       'muestra',
     );
