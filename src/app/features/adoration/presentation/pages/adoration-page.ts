@@ -182,7 +182,7 @@ import { getCandleFlameLevel } from '../../domain/candle-flame-level';
                     class="prayer-candle is-lit"
                     [style.--life-remaining]="candleLife(candle)"
                     [style.--flame-drop]="flameDrop(candle)"
-                    [attr.aria-label]="'Vela encendida por ' + candle.name + ', llama al ' + candleLife(candle) + ' por ciento, se apaga en ' + remainingTime(candle)"
+                    [attr.aria-label]="'Vela encendida por ' + candle.name + ', llama al ' + candleLifePercent(candle) + ' por ciento, se apaga en ' + remainingTime(candle)"
                   >
                     <span class="prayer-candle-votive" aria-hidden="true">
                       <span class="prayer-candle-flame"></span>
@@ -191,6 +191,8 @@ import { getCandleFlameLevel } from '../../domain/candle-flame-level';
                       <span class="prayer-candle-holder"></span>
                     </span>
                     <span class="prayer-candle-name">{{ candle.name }}</span>
+                    <span class="prayer-candle-time">{{ remainingTime(candle) }}</span>
+                    <span class="prayer-candle-level">{{ candleLifePercent(candle) }}%</span>
                   </article>
                 } @else {
                   <button
