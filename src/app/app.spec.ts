@@ -2,13 +2,54 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { App } from './app';
 import { routes } from './app.routes';
+import { AdminCrmPage } from './features/admin-crm/presentation/pages/admin-crm-page';
+import {
+  AdminChartData,
+  AdminChartHandle,
+  AdminChartRenderer,
+} from './features/admin-crm/presentation/services/admin-chart-renderer.service';
+
+let barChartSelections: Array<(index: number) => void>;
+let doughnutChartSelections: Array<(index: number) => void>;
+let barChartUpdates: AdminChartData[][];
 
 describe('App', () => {
   beforeEach(async () => {
+    barChartSelections = [];
+    doughnutChartSelections = [];
+    barChartUpdates = [];
+    const createHandle = (updates: AdminChartData[]): AdminChartHandle => ({
+      update: (data) => updates.push(data),
+      destroy: () => undefined,
+    });
+    const chartRendererMock = {
+      createBarChart: (
+        _canvas: HTMLCanvasElement,
+        _data: AdminChartData,
+        onSelect: (index: number) => void,
+      ) => {
+        const updates: AdminChartData[] = [];
+        barChartUpdates.push(updates);
+        barChartSelections.push(onSelect);
+        return createHandle(updates);
+      },
+      createDoughnutChart: (
+        _canvas: HTMLCanvasElement,
+        _data: AdminChartData,
+        onSelect: (index: number) => void,
+      ) => {
+        doughnutChartSelections.push(onSelect);
+        return createHandle([]);
+      },
+    };
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [provideRouter(routes)],
-    }).compileComponents();
+    })
+      .overrideComponent(AdminCrmPage, {
+        set: { providers: [{ provide: AdminChartRenderer, useValue: chartRendererMock }] },
+      })
+      .compileComponents();
   });
 
   it('should render the home page and shared navigation', async () => {
@@ -436,6 +477,214 @@ describe('App', () => {
     (compiled.querySelector('.parish-modal-close') as HTMLButtonElement).click();
     fixture.detectChanges();
     expect(compiled.querySelector('[role="dialog"]')).toBeNull();
+  });
+
+  it('should show the clearly labeled CRM demo and filter sample requests', async () => {
+    const fixture = TestBed.createComponent(App);
+    const router = TestBed.inject(Router);
+    await router.navigateByUrl('/administracion');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+
+    expect(compiled.querySelector('h1')?.textContent).toContain('Acceso al CRM');
+    expect(compiled.querySelector('.admin-demo-warning')?.textContent).toContain(
+      'no autentica usuarios',
+    );
+    expect((compiled.querySelector('#admin-password') as HTMLInputElement).disabled).toBe(true);
+    expect(compiled.querySelector('.admin-crm-shell')).toBeNull();
+
+    (compiled.querySelector('.admin-login-button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(compiled.querySelector('.admin-demo-banner')?.textContent).toContain(
+      'completamente ficticios',
+    );
+    expect(compiled.querySelector('#admin-dashboard-title')?.textContent).toContain(
+      'Resumen de actividad',
+    );
+    expect(compiled.querySelectorAll('.admin-chart-card')).toHaveLength(3);
+    expect(compiled.querySelectorAll('.admin-chart-card canvas')).toHaveLength(3);
+    expect(barChartSelections).toHaveLength(2);
+    expect(doughnutChartSelections).toHaveLength(1);
+    expect(compiled.querySelectorAll('.admin-request-table thead th')).toHaveLength(5);
+    expect(compiled.querySelector('.admin-request-table')?.tagName).toBe('TABLE');
+    expect(compiled.querySelector('.admin-donation-chart')?.textContent).toContain(
+      'Pagos procesados0',
+    );
+    expect(compiled.querySelector('.admin-donation-warning')?.textContent).toContain(
+      'Ningún monto representa dinero recibido',
+    );
+    expect(compiled.querySelectorAll('.admin-request-row')).toHaveLength(5);
+    expect(compiled.querySelector('.admin-page-summary')?.textContent).toContain('1–5 de 10');
+    const nextPageButton = compiled.querySelector(
+      '.admin-page-controls button[aria-label="Página siguiente"]',
+    ) as HTMLButtonElement;
+    expect(nextPageButton.disabled).toBe(false);
+    nextPageButton.click();
+    fixture.detectChanges();
+    expect(compiled.querySelectorAll('.admin-request-row')).toHaveLength(5);
+    expect(compiled.querySelector('.admin-page-controls')?.textContent).toContain('Página 2 de 2');
+    (
+      compiled.querySelector(
+        '.admin-page-controls button[aria-label="Página anterior"]',
+      ) as HTMLButtonElement
+    ).click();
+    fixture.detectChanges();
+
+    const statusFilter = compiled.querySelector('#admin-status-filter') as HTMLSelectElement;
+    statusFilter.value = 'Nueva';
+    statusFilter.dispatchEvent(new Event('change', { bubbles: true }));
+    fixture.detectChanges();
+    expect(compiled.querySelectorAll('.admin-request-row')).toHaveLength(5);
+    expect(compiled.querySelector('.admin-page-controls')?.textContent).toContain('Página 1 de 1');
+    statusFilter.value = 'all';
+    statusFilter.dispatchEvent(new Event('change', { bubbles: true }));
+    const pageSizeSelect = compiled.querySelector(
+      '.admin-page-size select',
+    ) as HTMLSelectElement;
+    pageSizeSelect.value = '10';
+    pageSizeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    fixture.detectChanges();
+    expect(compiled.querySelectorAll('.admin-request-row')).toHaveLength(10);
+
+    const categoryFilter = compiled.querySelector('#admin-category-filter') as HTMLSelectElement;
+    categoryFilter.value = 'service';
+    categoryFilter.dispatchEvent(new Event('change', { bubbles: true }));
+    fixture.detectChanges();
+    expect(compiled.querySelectorAll('.admin-request-row')).toHaveLength(2);
+    categoryFilter.value = 'all';
+    categoryFilter.dispatchEvent(new Event('change', { bubbles: true }));
+    fixture.detectChanges();
+
+    barChartSelections[0](2);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(compiled.querySelectorAll('.admin-request-row')).toHaveLength(2);
+    expect(categoryFilter.value).toBe('group');
+    categoryFilter.value = 'all';
+    categoryFilter.dispatchEvent(new Event('change', { bubbles: true }));
+    fixture.detectChanges();
+
+    doughnutChartSelections[0](0);
+    fixture.detectChanges();
+    expect(compiled.querySelectorAll('.admin-request-row')).toHaveLength(5);
+    expect(statusFilter.value).toBe('Nueva');
+    (compiled.querySelector('.admin-clear-filters') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    const dateFrom = compiled.querySelector('#admin-date-from') as HTMLInputElement;
+    dateFrom.value = '2026-10-16';
+    dateFrom.dispatchEvent(new Event('change', { bubbles: true }));
+    const dateTo = compiled.querySelector('#admin-date-to') as HTMLInputElement;
+    dateTo.value = '2026-10-16';
+    dateTo.dispatchEvent(new Event('change', { bubbles: true }));
+    fixture.detectChanges();
+    expect(compiled.querySelectorAll('.admin-request-row')).toHaveLength(2);
+    (compiled.querySelector('.admin-clear-filters') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(compiled.querySelectorAll('.admin-request-row')).toHaveLength(10);
+
+    categoryFilter.value = 'donation';
+    categoryFilter.dispatchEvent(new Event('change', { bubbles: true }));
+    fixture.detectChanges();
+    expect(compiled.querySelectorAll('.admin-request-row')).toHaveLength(2);
+    expect(compiled.querySelectorAll('.admin-request-donation')).toHaveLength(2);
+    expect(compiled.querySelector('.admin-request-donation')?.textContent).toContain('No pagada');
+    (compiled.querySelector('.admin-request-row') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(compiled.querySelector('.admin-donation-amount')?.textContent).toContain(
+      'no se procesó ninguna transacción',
+    );
+
+    categoryFilter.value = 'adoration';
+    categoryFilter.dispatchEvent(new Event('change', { bubbles: true }));
+    fixture.detectChanges();
+    expect(compiled.querySelectorAll('.admin-request-row')).toHaveLength(2);
+    expect(compiled.querySelector('.admin-request-row')?.textContent).toContain('Adoración');
+
+    categoryFilter.value = 'prayer';
+    categoryFilter.dispatchEvent(new Event('change', { bubbles: true }));
+    fixture.detectChanges();
+    expect(compiled.querySelectorAll('.admin-request-row')).toHaveLength(2);
+    expect(compiled.querySelector('.admin-request-row')?.textContent).toContain('Petición');
+
+    (compiled.querySelector('.admin-request-row') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(compiled.querySelector('.admin-request-detail')?.textContent).toContain(
+      'no se guardan fuera de esta sesión',
+    );
+
+    (compiled.querySelector('.admin-clear-filters') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    (compiled.querySelector('.admin-create-button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const setEditorField = (selector: string, value: string) => {
+      const input = compiled.querySelector(selector) as HTMLInputElement | HTMLTextAreaElement;
+      input.value = value;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    };
+    setEditorField('#crm-subject', 'Nueva solicitud de prueba');
+    setEditorField('#crm-full-name', 'Persona de prueba');
+    setEditorField('#crm-email', 'prueba@example.com');
+    setEditorField('#crm-summary', 'Registro temporal de prueba.');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const createSubmit = compiled.querySelector(
+      '.admin-editor-form button[type="submit"]',
+    ) as HTMLButtonElement;
+    expect(
+      [...compiled.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(
+        '.admin-editor-form input, .admin-editor-form select, .admin-editor-form textarea',
+      )]
+        .filter((field) => !field.validity.valid)
+        .map((field) => `${field.name}:${field.value}`)
+        .join('|'),
+    ).toBe('');
+    expect(createSubmit.disabled).toBe(false);
+    createSubmit.click();
+    fixture.detectChanges();
+    expect(compiled.querySelectorAll('.admin-request-row')).toHaveLength(10);
+    expect(barChartUpdates[0].at(-1)?.values[0]).toBe(3);
+    const createdRow = Array.from(compiled.querySelectorAll<HTMLButtonElement>('.admin-request-row'))
+      .find((row) => row.textContent?.includes('Nueva solicitud de prueba'));
+    expect(createdRow).toBeDefined();
+
+    (compiled.querySelector('.admin-edit-button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    setEditorField('#crm-subject', 'Solicitud editada');
+    const statusSelect = compiled.querySelector('#crm-status') as HTMLSelectElement;
+    statusSelect.value = 'Contactada';
+    statusSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    fixture.detectChanges();
+    (compiled.querySelector('.admin-editor-form button[type="submit"]') as HTMLButtonElement)
+      .click();
+    fixture.detectChanges();
+    expect(compiled.querySelector('.admin-request-detail h2')?.textContent).toContain(
+      'Solicitud editada',
+    );
+    expect(compiled.querySelector('.admin-request-detail .admin-request-status')?.textContent)
+      .toContain('Contactada');
+
+    (compiled.querySelector('.admin-delete-button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(compiled.querySelector('.admin-delete-confirmation')?.textContent).toContain(
+      '¿Eliminar este registro ficticio',
+    );
+    (compiled.querySelector('.admin-delete-confirmation button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(compiled.querySelectorAll('.admin-request-row')).toHaveLength(10);
+
+    (compiled.querySelector('.admin-exit-button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(compiled.querySelector('.admin-login-card')).not.toBeNull();
+    expect(compiled.querySelector('.admin-crm-shell')).toBeNull();
   });
 
   it('should show the sample Facebook video of the Word and direct fallback link', async () => {

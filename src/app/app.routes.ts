@@ -12,6 +12,14 @@ import { ParishGroupsPage } from './features/parish-groups/presentation/pages/pa
 import { ServicesPage } from './features/services/presentation/pages/services-page';
 
 export const routes: Routes = [
+  {
+    path: 'administracion',
+    loadComponent: () =>
+      import('./features/admin-crm/presentation/pages/admin-crm-page').then(
+        (module) => module.AdminCrmPage,
+      ),
+    title: 'Administración CRM | Catedral San Pedro',
+  },
   { path: '', component: HomePage, title: 'Inicio | Catedral San Pedro' },
   { path: 'catedral', component: CathedralPage, title: 'La Catedral | Catedral San Pedro' },
   { path: 'historia', component: HistoryPage, title: 'Historia | Catedral San Pedro' },

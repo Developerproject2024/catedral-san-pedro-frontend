@@ -23,6 +23,7 @@ solicitudes de servicios y formularios preparados para conectarse a un backend.
 | `/grupos` | Grupos parroquiales | Catálogo de ejemplo y modal para expresar interés en un grupo. |
 | `/evangelio` | Evangelio | Video y lectura de muestra; el video del día requiere integración de backend/Meta. |
 | `/contacto` | Contacto | Información de contacto de la Catedral. |
+| `/administracion` | CRM administrativo | Pantalla de acceso pendiente y CRUD temporal de solicitudes ficticias. |
 
 La navegación compartida agrupa las páginas en desplegables y adapta su
 presentación a pantallas móviles.
@@ -72,6 +73,7 @@ Los principales datos de muestra están en:
 | Catálogo de servicios y campos | `src/app/features/church-service-requests/infrastructure/data-sources/church-services.mock.ts` |
 | Video de muestra | `src/app/features/gospel/infrastructure/data-sources/gospel-video.mock.ts` |
 | Lectura bíblica de muestra | `src/app/features/gospel/infrastructure/data-sources/gospel-reading.mock.ts` |
+| Solicitudes ficticias para CRM | `src/app/features/admin-crm/infrastructure/data-sources/crm-requests.mock.ts` |
 
 Otros comportamientos de demostración:
 
@@ -85,6 +87,24 @@ Otros comportamientos de demostración:
 - La página de Donaciones no inicia una transacción.
 - El video y la lectura del Evangelio están marcados como contenido de muestra;
   no se actualizan automáticamente.
+- El CRM muestra registros totalmente ficticios. Permite buscar, filtrar por
+  tipo y estado, paginar, y crear, leer, editar y eliminar solicitudes,
+  adoraciones y registros de donación en memoria mientras la demostración está
+  abierta; los cambios se descartan al salir. No está conectado a formularios
+  ni a un servidor.
+- El dashboard administrativo incluye gráficas de solicitudes por sección y
+  estado, y montos de donaciones de muestra, renderizados de forma interactiva
+  con Chart.js. Sus indicadores se calculan desde los mocks y nunca representan
+  actividad o pagos reales.
+- El CRM reúne el dashboard y la bandeja de solicitudes en una sola vista.
+  Las gráficas de sección y estado permiten filtrar la tabla al seleccionarlas;
+  la bandeja también permite buscar y filtrar por tipo, estado y fechas.
+  Peticiones, servicios, grupos, adoraciones y donaciones se muestran en la
+  misma tabla. Las donaciones son registros ficticios independientes,
+  marcados como no pagados; no representan dinero recibido ni transacciones
+  procesadas.
+- El acceso demo no autentica usuarios ni controla roles. No existe una sesión
+  administrativa segura.
 
 ## Backend e integraciones previstas
 
@@ -101,6 +121,13 @@ pago.
 | Solicitudes de servicios | `GET /api/church-services`; `POST /api/church-service-requests` | `HttpChurchServiceRequestRepository` |
 | Video del Evangelio | `GET /api/gospel/video-of-the-day` | `HttpGospelVideoRepository` |
 | Peticiones de oración | `POST /api/prayer-requests` | `HttpPrayerRequestRepository` |
+
+El CRM `/administracion` aún no consulta estos endpoints: muestra datos
+ficticios de peticiones de oración, solicitudes de servicio e intereses en
+grupos. Su CRUD de demostración opera solo en memoria. La autenticación,
+autorización por roles, gestión de sesiones, consulta y modificación de
+solicitudes requieren endpoints y adaptadores backend adicionales. No proteger
+datos reales con una validación implementada solo en el frontend.
 
 Los contratos, campos esperados y responsabilidades del backend están
 documentados por funcionalidad en
@@ -252,6 +279,8 @@ actualmente un runner de pruebas end-to-end.
 
 - No guardar credenciales de Meta, claves privadas ni secretos en el frontend.
 - Consumir APIs de Meta y proveedores de pago desde el backend.
+- Autenticar al personal y autorizar cada operación en el backend; las rutas
+  Angular y los controles de interfaz no son mecanismos de seguridad.
 - No afirmar que un formulario se guardó o envió mientras se use un mock.
 - Validar en el servidor cada campo, identificador, fecha y consentimiento; la
   validación del navegador no es suficiente.
