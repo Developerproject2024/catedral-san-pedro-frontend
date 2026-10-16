@@ -182,7 +182,7 @@ import { getCandleFlameLevel } from '../../domain/candle-flame-level';
                     class="prayer-candle is-lit"
                     [style.--life-remaining]="candleLife(candle)"
                     [style.--flame-drop]="flameDrop(candle)"
-                    [attr.aria-label]="'Vela encendida por ' + candle.name + ', llama al ' + candleLife(candle) + ' por ciento, se apaga en ' + remainingTime(candle)"
+                    [attr.aria-label]="'Vela encendida por ' + candle.name + ', llama al ' + candleLifePercent(candle) + ' por ciento, se apaga en ' + remainingTime(candle)"
                   >
                     <span class="prayer-candle-votive" aria-hidden="true">
                       <span class="prayer-candle-flame"></span>
