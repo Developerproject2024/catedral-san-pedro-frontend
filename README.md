@@ -113,6 +113,19 @@ vivir en otro repositorio o desplegarse como API. No se deben incluir en
 Angular credenciales privadas, secretos de Meta ni claves de proveedores de
 pago.
 
+### Publicación en Render
+
+El archivo `render.yaml` define el sitio estático, el comando de compilación,
+el directorio publicado y la regla SPA para que las rutas de Angular sigan
+funcionando al recargar o abrir un enlace directamente. En Render, conecta el
+repositorio de GitHub y selecciona **Blueprint** para aplicar esta
+configuración. Si el servicio ya está creado, revisa en sus ajustes que use
+`npm ci && npm run build` como Build Command y
+`dist/catedral-san-pedro-frontend/browser` como Publish Directory; conserva el
+rewrite `/*` → `/index.html`. Después de enviar el cambio a GitHub, inicia un
+despliegue nuevo. El archivo local de configuración no cambia el servicio
+remoto hasta que se despliegue o se aplique el Blueprint.
+
 ### Adaptadores HTTP ya preparados
 
 | Funcionalidad | Endpoints esperados | Adaptador |
