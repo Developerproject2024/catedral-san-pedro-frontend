@@ -191,8 +191,6 @@ import { getCandleFlameLevel } from '../../domain/candle-flame-level';
                       <span class="prayer-candle-holder"></span>
                     </span>
                     <span class="prayer-candle-name">{{ candle.name }}</span>
-                    <span class="prayer-candle-time">{{ remainingTime(candle) }}</span>
-                    <span class="prayer-candle-level">{{ candleLifePercent(candle) }}%</span>
                   </article>
                 } @else {
                   <button
