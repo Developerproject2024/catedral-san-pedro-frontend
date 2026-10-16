@@ -1,39 +1,42 @@
 import { GospelReading } from '../../domain/entities/gospel-reading';
 
+
 export const GOSPEL_READING_MOCK: GospelReading = {
   reference: 'Lucas 12, 1-7',
   liturgicalDate: '2026-10-16',
-  translation: 'Reina-Valera Antigua',
-  sourceUrl: 'https://www.biblegateway.com/passage/?search=Lucas%2012%3A1-7&version=RVA',
+  translation: 'Conferencia Episcopal de Colombia',
+  sourceUrl:
+    'https://mail.cec.org.co/evangelio-diario/16-de-octubre-del-2026-lectura-del-santo-evangelio-segun-san-lucas-lc-12-1-7',
   isSample: true,
   verses: [
     {
       number: 1,
-      text: 'En esto, juntándose muchas gentes, tanto que unos á otros se hollaban, comenzó á decir á sus discípulos, primeramente: Guardaos de la levadura de los Fariseos, que es hipocresía.',
+      text: 'Jesús advierte a sus discípulos que se protejan de la hipocresía y vivan con sinceridad.',
     },
     {
       number: 2,
-      text: 'Porque nada hay encubierto, que no haya de ser descubierto; ni oculto, que no haya de ser sabido.',
+      text: 'Todo lo oculto terminará saliendo a la luz y lo secreto llegará a conocerse.',
     },
     {
       number: 3,
-      text: 'Por tanto, las cosas que dijisteis en tinieblas, á la luz serán oídas; y lo que hablasteis al oído en las cámaras, será pregonado en los terrados.',
+      text: 'Las palabras pronunciadas en secreto llegarán a escucharse públicamente.',
     },
     {
       number: 4,
-      text: 'Mas os digo, amigos míos: No temáis de los que matan el cuerpo, y después no tienen más que hacer.',
+      text: 'Jesús anima a sus amigos a no temer a quienes pueden quitarles la vida física.',
     },
     {
       number: 5,
-      text: 'Mas os enseñaré á quién temáis: temed á aquel que después de haber quitado la vida, tiene poder de echar en la Gehenna: así os digo: á éste temed.',
+      text: 'Les enseña a reconocer la autoridad de Dios y a vivir con reverencia ante él.',
     },
     {
       number: 6,
-      text: '¿No se venden cinco pajarillos por dos blancas? pues ni uno de ellos está olvidado delante de Dios.',
+      text: 'Dios no olvida a sus criaturas, ni siquiera a los pájaros pequeños.',
     },
     {
       number: 7,
-      text: 'Y aun los cabellos de vuestra cabeza están todos contados. No temáis pues: de más estima sois que muchos pajarillos.',
+      text: 'Dios conoce hasta los cabellos de nuestra cabeza. No debemos tener miedo, porque somos valiosos para él.',
     },
   ],
 };
+
